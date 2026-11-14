@@ -126,4 +126,9 @@ table.preview td.masked {
   background: #fff5f4;
 }
 
+table.preview td.total { background: #f7f9fc; font-weight: 600; }
+
+.combo-list { margin: 8px 0 0; padding-left: 1.4rem; }
+.combo-list li { margin: 4px 0; }
+
 .download-form { margin-top: 14px; }

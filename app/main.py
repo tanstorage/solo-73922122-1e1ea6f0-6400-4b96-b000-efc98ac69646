@@ -1,9 +1,11 @@
 """病例交叉表安全交付工具 —— FastAPI 网页应用。
 
 页面：
-  GET  /         上传页（文件或粘贴 CSV）
-  POST /analyze  解析、遮盖并在浏览器中预览交付表
-  POST /download 下载与预览同内容的 CSV
+  GET  /              上传页（文件或粘贴 CSV）
+  POST /analyze       解析、遮盖并在浏览器中预览交付表
+  POST /download      下载与预览同内容的 CSV
+  GET  /totals        合计差错定位上传页
+  POST /totals/check  核对已遮盖交付表的行合计、列合计与总计
 """
 
 from fastapi import FastAPI, Form, Request, UploadFile
@@ -16,12 +18,14 @@ import re
 from .csvutil import (InputError, decode_upload, delivery_rows,
                       parse_crosstab, render_delivery_csv)
 from .masking import find_hidden_cells
+from .totals_web import router as totals_router
 
 BASE_DIR = Path(__file__).resolve().parent
 
 _SAFE_FILENAME_RE = re.compile(r"[^\w.\-一-鿿]+")
 
 app = FastAPI(title="病例交叉表安全交付工具")
+app.include_router(totals_router)
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 

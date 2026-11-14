@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>合计核对结果 - 病例交叉表安全交付工具</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<main class="container">
+  <h1>合计核对结果</h1>
+
+  <section class="card">
+    <h2>交付表内容</h2>
+    <table class="preview">
+      <thead>
+        <tr>
+          <th>{{ tab.corner }}</th>
+          {% for label in tab.col_labels %}
+          <th>{{ label }}</th>
+          {% endfor %}
+          <th>合计</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in range(tab.n_rows) %}
+        <tr>
+          <td>{{ tab.row_labels[i] }}</td>
+          {% for j in range(tab.n_cols) %}
+            {% if tab.cells[i][j] is none %}
+            <td class="masked">*</td>
+            {% else %}
+            <td>{{ tab.cells[i][j] }}</td>
+            {% endif %}
+          {% endfor %}
+          <td class="total">{{ tab.row_totals[i] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <th>合计</th>
+          {% for value in tab.col_totals %}
+          <th>{{ value }}</th>
+          {% endfor %}
+          <th>{{ tab.grand_total }}</th>
+        </tr>
+      </tfoot>
+    </table>
+    <p class="muted">表中合计为上传内容原样回显，未被改动。</p>
+  </section>
+
+  {% if consistent %}
+  <section class="card success">
+    <h2>无需核对</h2>
+    <p>原表的行合计、列合计与总计彼此相容：在保持公开格不变的前提下，
+      存在一组正整数填满各 * 格，使全部合计成立。</p>
+    <p class="muted">为保护数据，系统不会显示任何隐藏人数或推测值。</p>
+  </section>
+  {% else %}
+  <section class="card error">
+    <h2>需要核对 {{ minimum }} 个合计字段</h2>
+    <p>在保持公开格不变、* 格取正整数的前提下，更正少于
+      {{ minimum }} 个合计字段时，其余合计无法同时成立。以下
+      <strong>{{ n_combos }}</strong> 组字段组合都只需核对
+      {{ minimum }} 个字段，且均能让其余合计与某组正整数填法相容：
+    </p>
+    <ol class="combo-list">
+      {% for combo in combos %}
+      <li>{{ combo | join("、") }}</li>
+      {% endfor %}
+    </ol>
+    <p class="muted">
+      同一组内的字段需一起核对。系统只定位需要核对的合计字段，
+      不显示隐藏人数，也不推测这些字段应改成什么值。
+    </p>
+  </section>
+  {% endif %}
+
+  <p><a class="button" href="/totals">继续核对另一张交付表</a>
+     <a class="button" href="/">返回交付表生成</a></p>
+</main>
+</body>
+</html>
