@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>病例交叉表安全交付工具</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<main class="container">
+  <h1>病例交叉表安全交付工具</h1>
+  <p class="lead">
+    上传「地区 × 年龄段」病例交叉表 CSV，系统将按规则遮盖小计数字格，
+    生成保留行合计、列合计与总计的交付表，且每个被遮盖格都至少有两种
+    与公开数值及合计相容的正整数取值。
+  </p>
+
+  <section class="card">
+    <h2>输入格式要求</h2>
+    <ul>
+      <li>首行为年龄段标签，首列为地区标签，左上角为角标（可为空）；</li>
+      <li>数据区为 <strong>2～4 行 × 2～4 列</strong> 的非负整数；</li>
+      <li>行标签（地区）互不重复，列标签（年龄段）互不重复；</li>
+      <li>遮盖规则：人数为 1 或 2 的格子必须遮盖，零格保持公开，
+          必要时从其余正数格中追加最少数量的遮盖。</li>
+    </ul>
+    <details>
+      <summary>查看示例 CSV</summary>
+      <pre>地区,0-17岁,18-64岁,65岁以上
+甲区,5,1,0
+乙区,2,7,3
+丙区,4,6,8</pre>
+    </details>
+  </section>
+
+  {% if errors %}
+  <section class="card error">
+    <h2>输入不符合要求</h2>
+    <ul>
+      {% for msg in errors %}
+      <li>{{ msg }}</li>
+      {% endfor %}
+    </ul>
+    <p class="muted">请修正后重新上传。为保护数据，系统不会显示原始人数。</p>
+  </section>
+  {% endif %}
+
+  <section class="card">
+    <h2>上传 CSV</h2>
+    <form action="/analyze" method="post" enctype="multipart/form-data">
+      <div class="field">
+        <label for="file">选择 CSV 文件（UTF-8 编码）：</label>
+        <input type="file" id="file" name="file" accept=".csv,text/csv,text/plain">
+      </div>
+      <div class="field">
+        <label for="csv_text">或直接粘贴 CSV 内容：</label>
+        <textarea id="csv_text" name="csv_text" rows="8"
+                  placeholder="地区,0-17岁,18-64岁,65岁以上&#10;甲区,5,1,0&#10;乙区,2,7,3"></textarea>
+      </div>
+      <button type="submit" class="primary">生成交付表</button>
+    </form>
+  </section>
+</main>
+</body>
+</html>

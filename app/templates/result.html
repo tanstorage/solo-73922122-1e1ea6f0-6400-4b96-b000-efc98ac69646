@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>交付表预览 - 病例交叉表安全交付工具</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<main class="container">
+  <h1>交付表预览</h1>
+
+  {% if ok %}
+  <section class="card success">
+    <h2>遮盖完成</h2>
+    <p>
+      共遮盖 <strong>{{ n_hidden }}</strong> 格
+      （其中按规则遮盖 1/2 的格子 {{ n_mandatory }} 格，
+      追加遮盖 {{ n_extra }} 格，已取追加数量最少且坐标字典序最小的方案）。
+    </p>
+    {% if extra_labels %}
+    <p>追加遮盖的格子：{{ extra_labels | join("、") }}</p>
+    {% endif %}
+    <p class="muted">下表保留行合计、列合计与总计；每个 * 格都至少有两种
+      与公开数值及合计相容的正整数取值。</p>
+  </section>
+
+  <section class="card">
+    <h2>交付表内容</h2>
+    <table class="preview">
+      <thead>
+        <tr>
+          {% for cell in header %}
+          <th>{{ cell }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in body %}
+        <tr>
+          {% for cell in row %}
+          <td class="{{ 'masked' if cell == '*' else '' }}">{{ cell }}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          {% for cell in footer %}
+          <th>{{ cell }}</th>
+          {% endfor %}
+        </tr>
+      </tfoot>
+    </table>
+
+    <form action="/download" method="post" class="download-form">
+      <input type="hidden" name="csv_content" value="{{ csv_content }}">
+      <input type="hidden" name="filename" value="{{ filename }}">
+      <button type="submit" class="primary">下载同内容 CSV</button>
+      <a class="button" href="/">返回继续处理</a>
+    </form>
+  </section>
+  {% else %}
+  <section class="card error">
+    <h2>无法生成交付表</h2>
+    <p>{{ reason }}</p>
+    <p class="muted">为保护数据，系统不会显示原始人数。</p>
+    <a class="button" href="/">返回</a>
+  </section>
+  {% endif %}
+</main>
+</body>
+</html>
